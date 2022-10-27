@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 public class Lexer {
     private String cur_state = "Init";
     private final Scanner _scanner;
-
     private final static String number = "\\b\\d+|\\b\\d+.\\d+|\\b\\d+e\\d+|0[xX][0-9a-fA-F]+";
     private final static String identifier = "^([a-zA-Z_$])([a-zA-Z_$0-9])*$";
     private final static String punctuator = "([()\\[\\]{},:;.])";
@@ -89,7 +88,6 @@ public class Lexer {
                             tokens.add(new Token(line.substring(i, i + 1), TokenType.OPERATOR));
                             i++;
                             break;
-
                         }
                     }
                     if(line.substring(i,i+1).matches("#")) {
@@ -137,6 +135,7 @@ public class Lexer {
                     }
                     // все інше - помилки
                     System.out.println("Error in "+current);
+                    i++;
                     break;
 
                 case "CM":
@@ -147,7 +146,6 @@ public class Lexer {
                         cur_state="Init";
                     }
                     else {
-                        index=i;
                         i = line.length();
                         if(!_scanner.hasNextLine()) {
                             cur_state = "ERR";
@@ -177,8 +175,13 @@ public class Lexer {
                         i+=2;
                     }
                     else{
-                        cur_state = "ERR";
+                        while (i < line.length() && !line.substring(i, i + 1).matches("'")) {
+                            i++;
+                            cur_state = "ERR";
+                        }
+                        cur_state = "Init";
                         System.out.println("ERROR: It is not a char");
+                        i++;
                     }
                     break;
                 case "AN":
@@ -189,7 +192,11 @@ public class Lexer {
                         i=index;
                     }
                     else{
-                        cur_state="ERR";
+                        while (i < line.length() && !line.substring(i, i + 1).matches("\\s") &&
+                                !line.substring(i, i + 1).matches(punctuator) && !line.substring(i, i + 1).matches(operator)) {
+                            i++;
+                        }
+                        cur_state = "Init";
                         System.out.println("ERROR: annotation is not correct");
                     }
             }
